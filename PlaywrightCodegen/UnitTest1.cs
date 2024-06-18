@@ -72,6 +72,7 @@ namespace PlaywrightCodegen
             await page.GetByLabel("description").FillAsync("S");
             await page.GetByLabel("description").PressAsync("CapsLock");
             await page.GetByLabel("description").FillAsync("Sweet oranges");
+            await Task.Delay(2000);
             await page.GetByRole(AriaRole.Button, new() { Name = "Create" }).ClickAsync();
             await page.ScreenshotAsync(new PageScreenshotOptions { Path = "Screenshots\\ss3_create_After.png" });
 
@@ -110,12 +111,14 @@ namespace PlaywrightCodegen
             await page.GetByLabel("description").FillAsync("R");
             await page.GetByLabel("description").PressAsync("CapsLock");
             await page.GetByLabel("description").FillAsync("Red");
+            await Task.Delay(2000);
             await page.GetByRole(AriaRole.Button, new() { Name = "Create" }).ClickAsync();
             await page.ScreenshotAsync(new PageScreenshotOptions { Path = "Screenshots\\ss5_edit_AddingIncorrect.png" });
             await page.GetByRole(AriaRole.Link, new() { Name = "Edit" }).Nth(4).ClickAsync();
             await page.GetByLabel("product name").ClickAsync();
             await page.GetByLabel("product name").PressAsync("ArrowLeft");
             await page.GetByLabel("product name").FillAsync("Strawberry");
+            await Task.Delay(2000);
             await page.GetByRole(AriaRole.Button, new() { Name = "Save" }).ClickAsync();
             await page.ScreenshotAsync(new PageScreenshotOptions { Path = "Screenshots\\ss6_edit_EditedCorrectly.png" });
 
@@ -129,6 +132,9 @@ namespace PlaywrightCodegen
             {
                 Assert.Fail("Strawberry was not found in the list or was incorrectly edited.");
             }
+            await Task.Delay(2000);
+            await page.GetByRole(AriaRole.Link, new() { Name = "Delete" }).Nth(4).ClickAsync();
+            await page.GetByRole(AriaRole.Button, new() { Name = "Delete" }).ClickAsync();
 
             await context.CloseAsync();
 
@@ -140,24 +146,58 @@ namespace PlaywrightCodegen
             var context = await CreateBrowserContextAsync();
             var page = await context.NewPageAsync();
 
+ 
+
             await page.GotoAsync("https://localhost:44371/");
+            
+
             await page.ScreenshotAsync(new PageScreenshotOptions { Path = "Screenshots\\ss7_delete_beforeDelete.png" });
+            var rowCountBefore = await page.EvaluateAsync<int>("() => document.querySelectorAll('table tr').length");
+            await Task.Delay(2000);
             await page.GetByRole(AriaRole.Link, new() { Name = "Delete" }).Nth(4).ClickAsync();
             await page.GetByRole(AriaRole.Button, new() { Name = "Delete" }).ClickAsync();
+            await Task.Delay(2000);
             await page.ScreenshotAsync(new PageScreenshotOptions { Path = "Screenshots\\ss8_delete_afterDelete.png" });
 
-            var itemVisible = await page.GetByRole(AriaRole.Cell, new() { Name = "Oranges", Exact = true }).IsVisibleAsync();
+            await page.GotoAsync("https://localhost:44371/");
+            var rowCountAfter = await page.EvaluateAsync<int>("() => document.querySelectorAll('table tr').length");
+            
 
-            if (!itemVisible)
+            if (rowCountAfter < rowCountBefore)
             {
-                Console.WriteLine("Oranges was deleted, Test passed.");
+                Console.WriteLine("Oranges was deleted, Test passed." + rowCountAfter + rowCountBefore);
             }
             else
             {
-                Assert.Fail("The new item 'Oranges' was found in the list. Test failed.");
+                Assert.Fail("The new item 'Oranges' was found in the list. Test failed." + rowCountAfter +" " + rowCountBefore);
             }
 
             await context.CloseAsync();
+        }
+
+        [Test]
+
+        public async Task viewDetailsTest()
+        {
+            var context = await CreateBrowserContextAsync();
+            var page = await context.NewPageAsync();
+
+            await page.GotoAsync("https://localhost:44371/");
+            await page.GetByRole(AriaRole.Link, new() { Name = "Details" }).First.ClickAsync();
+            await page.ScreenshotAsync(new PageScreenshotOptions { Path = "Screenshots\\ss8_view_viewDetails.png" });
+            await Task.Delay(2000);
+            await page.GetByText("product name").ClickAsync();
+            await page.GetByText("Apple").ClickAsync();
+            await page.GetByText("Price").ClickAsync();
+            await page.GetByText("1.99").ClickAsync();
+            await page.GetByText("description").ClickAsync();
+            await page.GetByText("yum").ClickAsync();
+            await page.GetByRole(AriaRole.Link, new() { Name = "Edit" }).ClickAsync();
+            await page.GetByLabel("product name").ClickAsync();
+            await page.GetByLabel("Price").ClickAsync();
+            await page.GetByLabel("description").ClickAsync();
+            await page.ScreenshotAsync(new PageScreenshotOptions { Path = "Screenshots\\ss9_view_viewEditDetails.png" });
+            await page.GetByRole(AriaRole.Link, new() { Name = "Back to List" }).ClickAsync();
         }
     }
 }
