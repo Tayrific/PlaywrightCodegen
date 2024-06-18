@@ -196,7 +196,7 @@ namespace PlaywrightCodegen
             await page.GetByLabel("product name").ClickAsync();
             await page.GetByLabel("Price").ClickAsync();
             await page.GetByLabel("description").ClickAsync();
-            await page.ScreenshotAsync(new PageScreenshotOptions { Path = "Screenshots\\ss9_view_viewEditDetails.png" });
+            await page.ScreenshotAsync(new PageScreenshotOptions { Path = "Screenshots\\ss9_view_viewEdtDetails.png" });
             await page.GetByRole(AriaRole.Link, new() { Name = "Back to List" }).ClickAsync();
         }
     }
